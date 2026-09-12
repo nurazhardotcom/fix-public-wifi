@@ -1,0 +1,22 @@
+{
+  "archify": "1",
+  "kind": "workflow",
+  "title": "fix-public-wifi — Solution workflow (probe → auth → verify)",
+  "meta": { "locale": "en", "visual_preset": "blueprint" },
+  "lanes": ["cli", "network", "gateway"],
+  "steps": [
+    { "id": "s1", "lane": "cli", "label": "Probe plain HTTP", "detail": "GET http://captive.apple.com/generate_204 + http://neverssl.com, redirects DISABLED, 10s timeout. Never HTTPS first." },
+    { "id": "s2", "lane": "network", "label": "Classify: 204/200 vs 302/307?", "detail": "204 or clean NeverSSL body = online (exit 0). 302/307 + Location, or hijacked 200 with login keywords = portal." },
+    { "id": "s3", "lane": "cli", "label": "Parse gateway params", "detail": "Extract Location header; parse mac, ip, session, zone query params (pure fn, tested)." },
+    { "id": "s4", "lane": "gateway", "label": "Fetch portal HTML", "detail": "GET Location URL. Regex-extract form action, hidden inputs, CSRF, TOS checkboxes." },
+    { "id": "s5", "lane": "cli", "label": "POST TOS-accept payload", "detail": "Merge hidden + CSRF + accept=on. Forward Cookie. --dry-run prints without sending." },
+    { "id": "s6", "lane": "network", "label": "Verify", "detail": "Re-probe HTTP targets; fallback ping 1.1.1.1. exit 0 verified, 1 still-captive, 2 timeout." }
+  ],
+  "transitions": [
+    { "from": "s1", "to": "s2" },
+    { "from": "s2", "to": "s3", "when": "portal?" },
+    { "from": "s3", "to": "s4" },
+    { "from": "s4", "to": "s5" },
+    { "from": "s5", "to": "s6" }
+  ]
+}

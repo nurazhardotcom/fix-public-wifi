@@ -1,0 +1,17 @@
+{
+  "archify": "1",
+  "kind": "sequence",
+  "title": "Changi Airport example — traveler auto-auth via fix-public-wifi",
+  "meta": { "locale": "en", "visual_preset": "classic" },
+  "participants": ["traveler:bb CLI", "gateway:#ChangiWiFi", "portal:auth.changi", "net:neverssl.com"],
+  "calls": [
+    { "from": "traveler:bb CLI", "to": "gateway:#ChangiWiFi", "label": "1. join #ChangiWiFi (DHCP 10.20.30.40)" },
+    { "from": "traveler:bb CLI", "to": "net:neverssl.com", "label": "2. GET http://captive.apple.com/generate_204" },
+    { "from": "net:neverssl.com", "to": "traveler:bb CLI", "label": "3. 302 Location: http://auth.changi/login?mac=AA&ip=10.20.30.40&session=abc123&zone=t2", "return": true },
+    { "from": "traveler:bb CLI", "to": "portal:auth.changi", "label": "4. GET portal HTML (form /auth/accept, csrf=tok-123, accept_tos)" },
+    { "from": "traveler:bb CLI", "to": "portal:auth.changi", "label": "5. POST /auth/accept {csrf, mac, accept_tos=on} + Cookie" },
+    { "from": "portal:auth.changi", "to": "traveler:bb CLI", "label": "6. 200/302 auth OK", "return": true },
+    { "from": "traveler:bb CLI", "to": "net:neverssl.com", "label": "7. re-GET http://neverssl.com → 200 NeverSSL (exit 0)" },
+    { "from": "traveler:bb CLI", "to": "traveler:bb CLI", "label": "alt: still captive → exit 1; no route → ping 1.1.1.1, fail → exit 2" }
+  ]
+}

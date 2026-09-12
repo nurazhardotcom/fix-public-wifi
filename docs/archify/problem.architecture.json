@@ -1,0 +1,24 @@
+{
+  "archify": "1",
+  "kind": "architecture",
+  "title": "fix-public-wifi — Problem: captive portal blocks HTTPS",
+  "meta": { "locale": "en", "visual_preset": "signal-flow", "theme": "dark" },
+  "nodes": [
+    { "id": "traveler", "kind": "actor", "label": "Traveler laptop", "detail": "Joins #ChangiWiFi at Changi Airport T2. No auth yet." },
+    { "id": "gateway", "kind": "service", "label": "Wi-Fi gateway (Cisco ISE / Aruba)", "detail": "Hijacks port 80, serves portal cert on port 443." },
+    { "id": "probe_http", "kind": "service", "label": "Probe: http://neverssl.com", "detail": "Plain HTTP. Gateway 302-redirects to portal. This IS the signal." },
+    { "id": "probe_https", "kind": "service", "label": "Probe: https://example.com", "detail": "TLS blocked: ERR_CERT_COMMON_NAME_INVALID + HSTS. Tells you nothing." },
+    { "id": "portal", "kind": "service", "label": "Captive portal login + TOS", "detail": "Form action, CSRF token, hidden inputs, accept checkbox." },
+    { "id": "internet", "kind": "external", "label": "Internet", "detail": "Reachable only after TOS accept POST + verify." }
+  ],
+  "edges": [
+    { "from": "traveler", "to": "gateway", "label": "join #ChangiWiFi (DHCP)" },
+    { "from": "traveler", "to": "probe_http", "label": "GET http://captive.apple.com/generate_204" },
+    { "from": "probe_http", "to": "traveler", "label": "302 Location: https://auth.changi…?mac&ip&session" },
+    { "from": "traveler", "to": "probe_https", "label": "GET https://… (DO NOT do this first)" },
+    { "from": "probe_https", "to": "traveler", "label": "cert mismatch / HSTS error" },
+    { "from": "traveler", "to": "portal", "label": "GET landing HTML" },
+    { "from": "portal", "to": "internet", "label": "blocked until auth POST" }
+  ],
+  "views": [{ "id": "problem-path", "title": "Why HTTPS-first fails", "route": "traveler~portal" }]
+}

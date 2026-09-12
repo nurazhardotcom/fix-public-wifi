@@ -1,0 +1,76 @@
+<!doctype html>
+<!-- fix-public-wifi archify viewer — self-contained, no external deps.
+     IR sources: problem.architecture.json, solution.workflow.json, changi.sequence.json
+     Inspired by https://github.com/tt-a1i/archify (typed JSON IR -> deterministic HTML/SVG). -->
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>fix-public-wifi — archify diagrams</title>
+<style>
+:root{--bg:#0b0e14;--fg:#e6e9f0;--mut:#9aa4b2;--card:#141a26;--line:#2a3половина445c;--acc:#5ac8fa;--ok:#30d158;--warn:#ffd60a}
+:root{--line:#2a3445}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,sans-serif}
+header{padding:28px 22px;border-bottom:1px solid var(--line)}main{max-width:980px;margin:0 auto;padding:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:18px 0}
+svg{width:100%;height:auto;background:#0e1420;border:1px solid var(--line);border-radius:10px}
+.mut{color:var(--mut)}.row{display:flex;gap:10px;flex-wrap:wrap}button{background:#1d2637;color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer}
+body.light{--bg:#f6f7f9;--fg:#141a26;--card:#fff;--line:#dde3ec}body.light svg{background:#fff}
+code{background:#00000040;padding:2px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<header>
+<h1>fix-public-wifi — problem &amp; solution <span class="mut">(archify-style)</span></h1>
+<p class="mut">Typed JSON IR in this folder → deterministic SVG below. Single file, offline.
+Method: <a href="https://github.com/tt-a1i/archify">tt-a1i/archify</a> — architecture / workflow / sequence. Example: Changi Airport #ChangiWiFi.</p>
+<div class="row"><button onclick="document.body.classList.toggle('light')">Toggle theme (T)</button>
+<a href="./problem.architecture.json"><button>problem IR</button></a>
+<a href="./solution.workflow.json"><button>solution IR</button></a>
+<a href="./changi.sequence.json"><button>changi IR</button></a></div>
+</header>
+<main>
+<div class="card"><h2>1 · Problem architecture — why HTTPS-first fails</h2>
+<svg viewBox="0 0 900 300" role="img" aria-label="problem architecture">
+<defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="none" stroke="#5ac8fa" stroke-width="1.5"/></marker></defs>
+<rect x="20" y="110" width="150" height="70" rx="10" fill="none" stroke="#5ac8fa"/><text x="95" y="138" fill="#e6e9f0" text-anchor="middle" font-size="13">Traveler laptop</text><text x="95" y="156" fill="#9aa4b2" text-anchor="middle" font-size="11">#ChangiWiFi T2</text>
+<rect x="230" y="110" width="170" height="70" rx="10" fill="none" stroke="#ffd60a"/><text x="315" y="138" fill="#e6e9f0" text-anchor="middle" font-size="13">Wi-Fi gateway</text><text x="315" y="156" fill="#9aa4b2" text-anchor="middle" font-size="11">hijacks :80 / :443</text>
+<rect x="460" y="30" width="200" height="70" rx="10" fill="none" stroke="#30d158"/><text x="560" y="56" fill="#e6e9f0" text-anchor="middle" font-size="13">http://neverssl.com</text><text x="560" y="74" fill="#30d158" text-anchor="middle" font-size="11">302 → portal (signal)</text>
+<rect x="460" y="190" width="200" height="70" rx="10" fill="none" stroke="#ff6b6b"/><text x="560" y="216" fill="#e6e9f0" text-anchor="middle" font-size="13">https://… (don't)</text><text x="560" y="234" fill="#ff6b6b" text-anchor="middle" font-size="11">cert mismatch / HSTS</text>
+<rect x="720" y="110" width="160" height="70" rx="10" fill="none" stroke="#5ac8fa"/><text x="800" y="138" fill="#e6e9f0" text-anchor="middle" font-size="13">Portal + TOS</text><text x="800" y="156" fill="#9aa4b2" text-anchor="middle" font-size="11">form·csrf·accept</text>
+<line x1="170" y1="135" x2="228" y2="135" stroke="#5ac8fa" marker-end="url(#a)"/><line x1="315" y1="110" x2="500" y2="65" stroke="#30d158" marker-end="url(#a)"/><line x1="315" y1="180" x2="500" y2="225" stroke="#ff6b6b" marker-end="url(#a)"/><line x1="660" y1="65" x2="740" y2="120" stroke="#30d158" marker-end="url(#a)"/>
+</svg>
+<p class="mut">Gateway serves its own cert for foreign hostnames → <code>ERR_CERT_COMMON_NAME_INVALID</code>. Plain-HTTP 302 + <code>Location</code> is the only trustworthy signal.</p></div>
+
+<div class="card"><h2>2 · Solution workflow — probe → auth → verify</h2>
+<svg viewBox="0 0 900 150" role="img" aria-label="solution workflow">
+<rect x="10" y="40" width="130" height="60" rx="10" fill="none" stroke="#5ac8fa"/><text x="75" y="65" fill="#e6e9f0" font-size="12" text-anchor="middle">Probe HTTP</text><text x="75" y="82" fill="#9aa4b2" font-size="10" text-anchor="middle">204 / neverssl</text>
+<rect x="160" y="40" width="130" height="60" rx="10" fill="none" stroke="#5ac8fa"/><text x="225" y="65" fill="#e6e9f0" font-size="12" text-anchor="middle">Classify</text><text x="225" y="82" fill="#9aa4b2" font-size="10" text-anchor="middle">302? hijack?</text>
+<rect x="310" y="40" width="130" height="60" rx="10" fill="none" stroke="#5ac8fa"/><text x="375" y="65" fill="#e6e9f0" font-size="12" text-anchor="middle">Parse params</text><text x="375" y="82" fill="#9aa4b2" font-size="10" text-anchor="middle">mac·ip·session</text>
+<rect x="460" y="40" width="130" height="60" rx="10" fill="none" stroke="#5ac8fa"/><text x="525" y="65" fill="#e6e9f0" font-size="12" text-anchor="middle">Fetch + POST</text><text x="525" y="82" fill="#9aa4b2" font-size="10" text-anchor="middle">csrf + TOS on</text>
+<rect x="610" y="40" width="130" height="60" rx="10" fill="none" stroke="#30d158"/><text x="675" y="65" fill="#e6e9f0" font-size="12" text-anchor="middle">Verify</text><text x="675" y="82" fill="#9aa4b2" font-size="10" text-anchor="middle">re-probe·ping</text>
+<rect x="760" y="40" width="130" height="60" rx="10" fill="none" stroke="#9aa4b2"/><text x="825" y="65" fill="#e6e9f0" font-size="12" text-anchor="middle">exit 0/1/2</text><text x="825" y="82" fill="#9aa4b2" font-size="10" text-anchor="middle">ok·fail·timeout</text>
+<line x1="140" y1="70" x2="158" y2="70" stroke="#5ac8fa" marker-end="url(#a)"/><line x1="290" y1="70" x2="308" y2="70" stroke="#5ac8fa" marker-end="url(#a)"/><line x1="440" y1="70" x2="458" y2="70" stroke="#5ac8fa" marker-end="url(#a)"/><line x1="590" y1="70" x2="608" y2="70" stroke="#5ac8fa" marker-end="url(#a)"/><line x1="740" y1="70" x2="758" y2="70" stroke="#5ac8fa" marker-end="url(#a)"/>
+</svg>
+<p class="mut">Exits: <code>0</code> online/verified · <code>1</code> portal but auth failed · <code>2</code> timeout. <code>--dry-run</code> prints payload, sends nothing.</p></div>
+
+<div class="card"><h2>3 · Sequence — Changi Airport walkthrough</h2>
+<svg viewBox="0 0 900 340" role="img" aria-label="changi sequence">
+<text x="110" y="20" fill="#e6e9f0" font-size="12" text-anchor="middle">traveler:bb</text><line x1="110" y1="28" x2="110" y2="320" stroke="#2a3445"/>
+<text x="340" y="20" fill="#e6e9f0" font-size="12" text-anchor="middle">gateway:#ChangiWiFi</text><line x1="340" y1="28" x2="340" y2="320" stroke="#2a3445"/>
+<text x="570" y="20" fill="#e6e9f0" font-size="12" text-anchor="middle">portal:auth.changi</text><line x1="570" y1="28" x2="570" y2="320" stroke="#2a3445"/>
+<text x="790" y="20" fill="#e6e9f0" font-size="12" text-anchor="middle">net:neverssl</text><line x1="790" y1="28" x2="790" y2="320" stroke="#2a3445"/>
+<line x1="110" y1="50" x2="338" y2="50" stroke="#5ac8fa" marker-end="url(#a)"/><text x="224" y="44" fill="#9aa4b2" font-size="10" text-anchor="middle">1. join DHCP 10.20.30.40</text>
+<line x1="110" y1="90" x2="788" y2="90" stroke="#5ac8fa" marker-end="url(#a)"/><text x="449" y="84" fill="#9aa4b2" font-size="10" text-anchor="middle">2. GET http://captive.apple.com/generate_204</text>
+<line x1="788" y1="130" x2="112" y2="130" stroke="#ffd60a" stroke-dasharray="5 4" marker-end="url(#a)"/><text x="450" y="124" fill="#ffd60a" font-size="10" text-anchor="middle">3. 302 Location …?mac&amp;ip&amp;session=abc123&amp;zone=t2</text>
+<line x1="110" y1="170" x2="568" y2="170" stroke="#5ac8fa" marker-end="url(#a)"/><text x="339" y="164" fill="#9aa4b2" font-size="10" text-anchor="middle">4. GET portal HTML</text>
+<line x1="110" y1="210" x2="568" y2="210" stroke="#30d158" marker-end="url(#a)"/><text x="339" y="204" fill="#30d158" font-size="10" text-anchor="middle">5. POST /auth/accept {csrf, accept_tos=on}</text>
+<line x1="568" y1="250" x2="112" y2="250" stroke="#30d158" stroke-dasharray="5 4" marker-end="url(#a)"/><text x="340" y="244" fill="#30d158" font-size="10" text-anchor="middle">6. 200 auth OK</text>
+<line x1="110" y1="290" x2="788" y2="290" stroke="#5ac8fa" marker-end="url(#a)"/><text x="449" y="284" fill="#9aa4b2" font-size="10" text-anchor="middle">7. re-GET neverssl → 200 (exit 0)</text>
+</svg>
+<p class="mut">Try it at Changi: <code>bb -m fix-public-wifi.core --verbose</code> after joining #ChangiWiFi. Safe preview: <code>--dry-run</code>.</p></div>
+<p class="mut">Diagrams generated from versioned JSON IR in this folder (archify method). Press <code>T</code> for theme.</p>
+</main>
+<script>addEventListener('keydown',e=>{if(e.key.toLowerCase()==='t')document.body.classList.toggle('light')})</script>
+</body>
+</html>

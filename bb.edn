@@ -1,0 +1,10 @@
+{:paths ["src" "test"]
+ :tasks
+ {test {:doc "Run unit tests (no network)"
+        :task ((requiring-resolve 'fix-public-wifi.test-runner/run))}
+  probe {:doc "Probe only (no auth)"
+         :task (let [main (requiring-resolve 'fix-public-wifi.core/-main)]
+                 (System/exit (apply main (concat ["--probe-only" "--verbose"] *command-line-args*))))}
+  auth {:doc "Full probe + auth + verify"
+        :task (let [main (requiring-resolve 'fix-public-wifi.core/-main)]
+                (System/exit (apply main *command-line-args*)))}}}
