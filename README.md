@@ -2,14 +2,27 @@
 
 Babashka/Clojure CLI that detects public Wi-Fi captive portals over **plain HTTP**, auto-accepts the TOS/login form, and verifies access. Zero external deps. `AGPL-3.0-only`.
 
-## Problem → solution (archify diagrams)
+## Diagrams (archify)
 
-Visual explanation lives in [`docs/archify/`](docs/archify/) — typed JSON IR rendered to a single self-contained HTML file, following the method of [tt-a1i/archify](https://github.com/tt-a1i/archify) (typed IR → deterministic, verifiable diagrams; no Mermaid auto-layout guessing):
+Diagrams below are rendered from versioned, typed JSON IR in [`docs/archify/`](docs/archify/) — deterministic SVG checked into the repo, following the method of [tt-a1i/archify](https://github.com/tt-a1i/archify) (typed IR → verifiable diagrams, no auto-layout guessing). Interactive offline viewer: [`docs/archify/index.html`](docs/archify/index.html) (dark/light with `T`).
 
-- `problem.architecture.json` — **Architecture:** why `https://`-first probing fails (`ERR_CERT_COMMON_NAME_INVALID` / HSTS) and why plain-HTTP `302 + Location` is the real signal.
-- `solution.workflow.json` — **Workflow:** probe → classify → parse gateway params → fetch + POST TOS-accept → verify.
-- `changi.sequence.json` — **Sequence:** concrete Changi Airport walkthrough (below).
-- [`index.html`](docs/archify/index.html) — open offline, dark/light (`T`), no network needed.
+### 1 · Problem — why `https://`-first probing fails
+
+![Problem architecture: HTTPS-first fails, plain-HTTP 302 is the signal](docs/archify/problem.architecture.svg)
+
+Gateway serves its own cert for foreign hostnames → `ERR_CERT_COMMON_NAME_INVALID` / HSTS. Plain-HTTP `302 + Location` is the only trustworthy signal. IR: [`problem.architecture.json`](docs/archify/problem.architecture.json).
+
+### 2 · Solution — probe → auth → verify
+
+![Solution workflow: probe, classify, parse params, POST TOS-accept, verify](docs/archify/solution.workflow.svg)
+
+Exits: `0` online/verified · `1` portal but auth failed · `2` timeout. IR: [`solution.workflow.json`](docs/archify/solution.workflow.json).
+
+### 3 · Sequence — Changi Airport walkthrough
+
+![Sequence: Changi Airport auto-auth steps](docs/archify/changi.sequence.svg)
+
+IR: [`changi.sequence.json`](docs/archify/changi.sequence.json). Full transcript: [`docs/CHANGI_EXAMPLE.md`](docs/CHANGI_EXAMPLE.md).
 
 ## Worked example: Changi Airport (#ChangiWiFi, Terminal 2)
 
