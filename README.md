@@ -1,6 +1,8 @@
 # fix-public-wifi
 
-Babashka/Clojure CLI that detects captive portals over **plain HTTP**, assists with the portal's own TOS/login form on networks you own or are explicitly authorized to use, and verifies access. Zero external deps. `AGPL-3.0-only`.
+> **Status:** Maintenance — stable, security fixes only.
+
+Babashka/Clojure CLI that detects captive portals over **plain HTTP**, assists with the portal's own TOS/login form on networks you own or are explicitly authorized to use, and verifies access. Zero external deps. `MIT`.
 
 ## Authorized use only
 
@@ -65,9 +67,9 @@ CLI parsing supports **both** built-ins (`babashka.cli` preferred, `clojure.tool
 
 ```
 bb.edn  src/fix_public_wifi/{core,probe,portal,verify,cli}.clj
-test/fix_public_wifi/{probe,portal,cli}_test.clj  docs/archify/  LICENSE (AGPL-3.0)
+test/fix_public_wifi/{probe,portal,cli}_test.clj  docs/archify/  LICENSE (MIT)
 ```
 
 ## License
 
-AGPL-3.0-only. See [LICENSE](LICENSE). Copyright (C) 2026 nurazhardotcom.
+MIT. See [LICENSE](LICENSE). Copyright (C) 2026 nurazhardotcom.
