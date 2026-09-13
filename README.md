@@ -1,6 +1,12 @@
 # fix-public-wifi
 
-Babashka/Clojure CLI that detects public Wi-Fi captive portals over **plain HTTP**, auto-accepts the TOS/login form, and verifies access. Zero external deps. `AGPL-3.0-only`.
+Babashka/Clojure CLI that detects captive portals over **plain HTTP**, assists with the portal's own TOS/login form on networks you own or are explicitly authorized to use, and verifies access. Zero external deps. `AGPL-3.0-only`.
+
+## Authorized use only
+
+- Run only on networks you own, administer, or have explicit permission to test (home lab, office guest net with IT approval).
+- On unknown networks default to preview mode first — it sends nothing:
+- The tool only submits the portal's own published TOS form (the same click you would do in a browser). No credential bypass, no tunneling, no evasion.
 
 ## Diagrams (archify)
 
@@ -24,9 +30,9 @@ Exits: `0` online/verified · `1` portal but auth failed · `2` timeout. IR: [`s
 
 IR: [`changi.sequence.json`](docs/archify/changi.sequence.json). Full transcript: [`docs/CHANGI_EXAMPLE.md`](docs/CHANGI_EXAMPLE.md).
 
-## Worked example: Changi Airport (#ChangiWiFi, Terminal 2)
+## Worked example: airport TOS-accept flow (walkthrough of a standard portal flow observed on a public network)
 
-You land at SIN, join `#ChangiWiFi`, and have no route yet:
+Joining the airport Wi-Fi with no route yet (all steps below are the portal's own published form):
 
 1. `bb -m fix-public-wifi.core --verbose`
 2. CLI GETs `http://captive.apple.com/generate_204` (no TLS, redirects disabled).
@@ -35,7 +41,7 @@ You land at SIN, join `#ChangiWiFi`, and have no route yet:
 5. CLI POSTs `{csrf, mac, accept_tos=on}` with the gateway cookie.
 6. CLI re-probes `http://neverssl.com` → clean `200 NeverSSL` → **exit 0**. Still hijacked → **exit 1**. No route at all → ping `1.1.1.1` fails → **exit 2**.
 
-Safe preview on any network (sends nothing):
+Safe preview on any network (sends nothing — use this first on networks you don't administer):
 
 ```sh
 bb -m fix-public-wifi.core --dry-run --verbose
